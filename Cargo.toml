@@ -21,10 +21,6 @@ log = "0.4"
 sha2 = "0.8"
 urlparse = "~0.7.3"
 
-[dependencies.clippy]
-optional = true
-version = "~0.0.43"
-
 [dev-dependencies]
 bitflags = "0.4.0"
 clap = "2.1.2"
@@ -32,6 +28,3 @@ curl = "~0.2.16"
 env_logger = "~0.3.2"
 regex = "~0.1.54"
 xml-rs = "~0.3.0"
-
-[features]
-lint = ["clippy"]

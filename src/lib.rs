@@ -97,9 +97,6 @@
 //! [2]: http://docs.aws.amazon.com/general/latest/gr/signature-version-2.html
 //! [3]: http://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html
 //!
-#![cfg_attr(feature = "clippy", feature(plugin))]
-#![cfg_attr(feature = "clippy", plugin(clippy))]
-#![cfg_attr(feature = "clippy", deny(clippy, clippy_pedantic))]
 #![deny(missing_docs)]
 #[macro_use]
 extern crate log;
@@ -992,7 +989,6 @@ pub enum HttpRequestMethod {
     TRACE,
 }
 
-#[cfg_attr(feature = "clippy", allow(use_debug))]
 impl fmt::Display for HttpRequestMethod {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)

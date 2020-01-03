@@ -3,7 +3,6 @@ use hmac::Mac as _;
 use sha2::digest::Digest as _;
 
 /// Hash the given data (or an empty string) with SHA256.
-#[cfg_attr(feature = "clippy", allow(string_lit_as_bytes))]
 pub fn hashed_data(data: Option<&[u8]>) -> Result<String, AWSAuthError> {
     let data_to_hash = match data {
         Some(d) => d,
