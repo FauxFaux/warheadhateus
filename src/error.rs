@@ -51,7 +51,7 @@ impl From<chrono::format::ParseError> for AWSAuthError {
     }
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 /// Thrown when a given region cannot be parsed.
 pub struct ParseRegionError;
 
@@ -67,7 +67,7 @@ impl fmt::Display for ParseRegionError {
     }
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 /// Thrown when a given service cannot be parsed.
 pub struct ParseServiceError;
 

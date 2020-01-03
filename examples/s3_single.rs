@@ -2,10 +2,10 @@ extern crate chrono;
 extern crate env_logger;
 extern crate warheadhateus;
 
-use chrono::UTC;
 use chrono::offset::TimeZone;
+use chrono::UTC;
 use std::io::{self, Write};
-use warheadhateus::{AWSAuth, AWSAuthError, hashed_data, HttpRequestMethod, Region, Service};
+use warheadhateus::{hashed_data, AWSAuth, AWSAuthError, HttpRequestMethod, Region, Service};
 
 const EX_STDOUT: &'static str = "Unable to write to stdout!";
 const ACCESS_KEY_ID: &'static str = "AKIAIOSFODNN7EXAMPLE";

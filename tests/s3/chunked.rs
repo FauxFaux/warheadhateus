@@ -1,7 +1,7 @@
-use {ACCESS_KEY_ID, fail, SCOPE_DATE, SECRET_ACCESS_KEY, DATE_TIME_FMT};
-use chrono::UTC;
 use chrono::offset::TimeZone;
-use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, Mode, Region, SAM, Service};
+use chrono::UTC;
+use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, Mode, Region, Service, SAM};
+use {fail, ACCESS_KEY_ID, DATE_TIME_FMT, SCOPE_DATE, SECRET_ACCESS_KEY};
 
 const HOST: &'static str = "s3.amazonaws.com";
 const SEED_SIG: &'static str = "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0\
@@ -20,13 +20,19 @@ const AWS_TEST_5: &'static str = "AWS4-HMAC-SHA256 \
                                  Signature=4f232c4386841ef735655705268965c44a0e4690baa4adea15\
                                  3f7db9fa80a0a9";
 
-fn test_cl(auth: &mut AWSAuth, chunk_size: usize, payload_size: usize) -> Result<usize, AWSAuthError> {
+fn test_cl(
+    auth: &mut AWSAuth,
+    chunk_size: usize,
+    payload_size: usize,
+) -> Result<usize, AWSAuthError> {
     auth.set_chunk_size(chunk_size);
     Ok(try!(auth.content_length(payload_size)))
 }
 
 fn get_auth() -> Result<AWSAuth, AWSAuthError> {
-    let mut auth = try!(AWSAuth::new("https://s3.amazonaws.com/examplebucket/chunkObject.txt"));
+    let mut auth = try!(AWSAuth::new(
+        "https://s3.amazonaws.com/examplebucket/chunkObject.txt"
+    ));
     let scope_date = try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
     auth.set_mode(Mode::Chunked);
     auth.set_request_type(HttpRequestMethod::PUT);
@@ -75,10 +81,12 @@ fn test_chunk_1() {
     let mut auth = get_auth().unwrap_or_else(|e| fail(e));
     auth.set_sam(SAM::AWS4HMACSHA256PAYLOAD);
     let many_a: Vec<u8> = vec![97; 65536];
-    let sig = auth.chunk_signature(SEED_SIG, &many_a).unwrap_or_else(|e| fail(e));
+    let sig = auth
+        .chunk_signature(SEED_SIG, &many_a)
+        .unwrap_or_else(|e| fail(e));
     assert!(sig == CHUNK_SIG_1);
     let b = auth.chunk_body(&sig, &many_a).unwrap_or_else(|e| fail(e));
-    assert!(b.len() == 65626);
+    assert_eq!(b.len(), 65626);
 }
 
 #[test]
@@ -86,7 +94,9 @@ fn test_chunk_2() {
     let mut auth = get_auth().unwrap_or_else(|e| fail(e));
     auth.set_sam(SAM::AWS4HMACSHA256PAYLOAD);
     let less_a = vec![97; 1024];
-    let sig = auth.chunk_signature(CHUNK_SIG_1, &less_a).unwrap_or_else(|e| fail(e));
+    let sig = auth
+        .chunk_signature(CHUNK_SIG_1, &less_a)
+        .unwrap_or_else(|e| fail(e));
     assert!(sig == CHUNK_SIG_2);
     let b = auth.chunk_body(&sig, &less_a).unwrap_or_else(|e| fail(e));
     assert!(b.len() == 1112);
@@ -96,7 +106,9 @@ fn test_chunk_2() {
 fn test_chunk_3() {
     let mut auth = get_auth().unwrap_or_else(|e| fail(e));
     auth.set_sam(SAM::AWS4HMACSHA256PAYLOAD);
-    let sig = auth.chunk_signature(CHUNK_SIG_2, &[]).unwrap_or_else(|e| fail(e));
+    let sig = auth
+        .chunk_signature(CHUNK_SIG_2, &[])
+        .unwrap_or_else(|e| fail(e));
     assert!(sig == CHUNK_SIG_3);
     let b = auth.chunk_body(&sig, &[]).unwrap_or_else(|e| fail(e));
     assert!(b.len() == 86);

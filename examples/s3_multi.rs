@@ -2,11 +2,11 @@ extern crate chrono;
 extern crate env_logger;
 extern crate warheadhateus;
 
-use chrono::UTC;
 use chrono::offset::TimeZone;
+use chrono::UTC;
 use std::fmt;
 use std::io::{self, Write};
-use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, Mode, Region, SAM, Service};
+use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, Mode, Region, Service, SAM};
 
 const EX_STDOUT: &'static str = "Unable to write to stdout!";
 const ACCESS_KEY_ID: &'static str = "AKIAIOSFODNN7EXAMPLE";
@@ -27,10 +27,16 @@ struct OutCache {
 }
 
 impl OutCache {
-    pub fn hl<T>(&mut self, heading: &str, val: T) -> &mut OutCache where T: fmt::Display {
+    pub fn hl<T>(&mut self, heading: &str, val: T) -> &mut OutCache
+    where
+        T: fmt::Display,
+    {
         let mut h = String::from(heading);
         h.push(':');
-        self.lines.push(Line{heading: h, val: format!("{}", val)});
+        self.lines.push(Line {
+            heading: h,
+            val: format!("{}", val),
+        });
         self
     }
 
@@ -60,10 +66,11 @@ impl OutCache {
     }
 }
 
-
 fn run() -> Result<(), AWSAuthError> {
     let chunk_size = 65536;
-    let mut auth = try!(AWSAuth::new("https://s3.amazonaws.com/examplebucket/chunkObject.txt"));
+    let mut auth = try!(AWSAuth::new(
+        "https://s3.amazonaws.com/examplebucket/chunkObject.txt"
+    ));
     let scope_date = try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
     auth.set_mode(Mode::Chunked);
     auth.set_request_type(HttpRequestMethod::PUT);
@@ -108,7 +115,10 @@ fn run() -> Result<(), AWSAuthError> {
         if let Some(p) = cb.len().checked_sub(chunk.len()) {
             // Account for 2 \r\n's
             let np = p - 4;
-            oc.hl(&format!("Chunk {} Prefix", count), String::from_utf8_lossy(&cb[..np]));
+            oc.hl(
+                &format!("Chunk {} Prefix", count),
+                String::from_utf8_lossy(&cb[..np]),
+            );
         }
         count += 1;
         ps = cs;
@@ -123,7 +133,10 @@ fn run() -> Result<(), AWSAuthError> {
     if let Some(p) = cb.len().checked_sub(0) {
         // Account for 2 \r\n's
         let np = p - 4;
-        oc.hl(&format!("Chunk {} Prefix", count), String::from_utf8_lossy(&cb[..np]));
+        oc.hl(
+            &format!("Chunk {} Prefix", count),
+            String::from_utf8_lossy(&cb[..np]),
+        );
     }
     oc.hl("Total Payload Length", tl);
     oc.hl("CL = TPL", cl == tl);

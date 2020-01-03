@@ -11,7 +11,7 @@ pub enum Mode {
 }
 
 /// AWS Services
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Service {
     /// AWS DynamoDB (Managed NoSQL Database)
     DynamoDB,
@@ -69,7 +69,7 @@ pub enum SigningVersion {
 }
 
 /// AWS Region
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Region {
     /// us-east-1
     UsEast1,

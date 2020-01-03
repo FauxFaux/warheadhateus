@@ -1,7 +1,7 @@
-use {ACCESS_KEY_ID, fail, HOST, SCOPE_DATE, SECRET_ACCESS_KEY, DATE_TIME_FMT};
-use chrono::UTC;
 use chrono::offset::TimeZone;
-use warheadhateus::{AWSAuth, hashed_data, HttpRequestMethod, Region, Service};
+use chrono::UTC;
+use warheadhateus::{hashed_data, AWSAuth, HttpRequestMethod, Region, Service};
+use {fail, ACCESS_KEY_ID, DATE_TIME_FMT, HOST, SCOPE_DATE, SECRET_ACCESS_KEY};
 
 const URL_1: &'static str = "https://examplebucket.s3.amazonaws.com/test.txt";
 const URL_2: &'static str = "https://examplebucket.s3.amazonaws.com/test$file.text";
@@ -34,7 +34,9 @@ const AWS_TEST_4: &'static str = "AWS4-HMAC-SHA256 \
 fn test_get_object() {
     let mut auth = AWSAuth::new(URL_1).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT).unwrap_or_else(|e| fail(e));
+    let scope_date = UTC
+        .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
+        .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::GET);
     auth.set_payload_hash(&payload_hash);
     auth.set_date(scope_date);
@@ -55,7 +57,9 @@ fn test_get_object() {
 fn test_put_object() {
     let mut auth = AWSAuth::new(URL_2).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(Some(b"Welcome to Amazon S3.")).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT).unwrap_or_else(|e| fail(e));
+    let scope_date = UTC
+        .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
+        .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::PUT);
     auth.set_payload_hash(&payload_hash);
     auth.set_date(scope_date);
@@ -77,7 +81,9 @@ fn test_put_object() {
 fn test_get_bucket_lifecycle() {
     let mut auth = AWSAuth::new(URL_3).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT).unwrap_or_else(|e| fail(e));
+    let scope_date = UTC
+        .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
+        .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::GET);
     auth.set_payload_hash(&payload_hash);
     auth.set_date(scope_date);
@@ -97,7 +103,9 @@ fn test_get_bucket_lifecycle() {
 fn test_get_bucket_list_objects() {
     let mut auth = AWSAuth::new(URL_4).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT).unwrap_or_else(|e| fail(e));
+    let scope_date = UTC
+        .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
+        .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::GET);
     auth.set_payload_hash(&payload_hash);
     auth.set_date(scope_date);

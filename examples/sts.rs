@@ -5,7 +5,7 @@ extern crate regex;
 extern crate warheadhateus;
 
 use chrono::UTC;
-use clap::{Arg, App};
+use clap::{App, Arg};
 use regex::Regex;
 use std::env;
 use std::fs::File;
@@ -45,7 +45,8 @@ fn run(token: &str) -> Result<(), AWSAuthError> {
     let date = UTC::now();
     let fmtdate = date.format(DATE_TIME_FMT).to_string();
     if let Ok((access_key, secret_key)) = credentials() {
-        let mut url = format!("https://sts.amazonaws.com\
+        let mut url = format!(
+            "https://sts.amazonaws.com\
                           ?Action=GetSessionToken\
                           &Version=2011-06-15\
                           &DurationSeconds=3600\
@@ -54,7 +55,9 @@ fn run(token: &str) -> Result<(), AWSAuthError> {
                           &AWSAccessKeyId={}\
                           &SignatureVersion=2\
                           &SignatureMethod=HmacSHA256\
-                          &Timestamp={}", token, access_key, fmtdate);
+                          &Timestamp={}",
+            token, access_key, fmtdate
+        );
         let mut auth = try!(AWSAuth::new(&url));
         auth.set_version(SigningVersion::Two);
         auth.set_request_type(HttpRequestMethod::GET);
@@ -73,16 +76,18 @@ fn run(token: &str) -> Result<(), AWSAuthError> {
 fn main() {
     env_logger::init().expect("Failed to initialize logging!");
     let matches = App::new("sts")
-                          .version("1.0")
-                          .author("Jason Ozias <jason.g.ozias@gmail.com>")
-                          .about("Run an AWS STS Request")
-                          .arg(Arg::with_name("token")
-                               .short("t")
-                               .long("token")
-                               .value_name("TOKEN")
-                               .help("Sets a token code from an authenticator")
-                               .takes_value(true))
-                          .get_matches();
+        .version("1.0")
+        .author("Jason Ozias <jason.g.ozias@gmail.com>")
+        .about("Run an AWS STS Request")
+        .arg(
+            Arg::with_name("token")
+                .short("t")
+                .long("token")
+                .value_name("TOKEN")
+                .help("Sets a token code from an authenticator")
+                .takes_value(true),
+        )
+        .get_matches();
     let token = matches.value_of("token").unwrap_or("123456");
     run(token).expect("Failed to chunk request!");
 }

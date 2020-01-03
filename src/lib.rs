@@ -119,11 +119,11 @@ pub use types::{Mode, Region, Service, SigningVersion};
 pub use utils::{hashed_data, signed_data};
 
 use chrono::{DateTime, UTC};
-use rustc_serialize::base64::{STANDARD, ToBase64};
+use rustc_serialize::base64::{ToBase64, STANDARD};
 use rustc_serialize::hex::ToHex;
 use std::collections::HashMap;
 use std::fmt;
-use std::sync::{ONCE_INIT, Once};
+use std::sync::{Once, ONCE_INIT};
 use urlparse::{quote, urlparse};
 
 const AWS4_REQUEST: &'static str = "aws4_request";
@@ -199,7 +199,10 @@ impl AWSAuth {
     /// ```
     pub fn new(url: &str) -> Result<AWSAuth, AWSAuthError> {
         let parsed = urlparse(url);
-        let mut auth = AWSAuth { path: parsed.path, ..Default::default() };
+        let mut auth = AWSAuth {
+            path: parsed.path,
+            ..Default::default()
+        };
 
         if let Some(h) = parsed.hostname {
             auth.host = h;
@@ -511,11 +514,10 @@ impl AWSAuth {
 
     fn scope(&self) -> String {
         let date_fmt = self.date.format(DATE_FMT).to_string();
-        format!("{}/{}/{}/{}",
-                date_fmt,
-                self.region,
-                self.service,
-                AWS4_REQUEST)
+        format!(
+            "{}/{}/{}/{}",
+            date_fmt, self.region, self.service, AWS4_REQUEST
+        )
     }
 
     fn credential(&self) -> String {
@@ -608,8 +610,8 @@ impl AWSAuth {
         let aws4 = AWS4_REQUEST.as_bytes();
         let date_key = try!(utils::signed_data(date.as_bytes(), key.as_bytes()));
         let date_region_key = try!(utils::signed_data(region.as_bytes(), &date_key));
-        let date_region_service_key = try!(utils::signed_data(service.as_bytes(),
-                                                              &date_region_key));
+        let date_region_service_key =
+            try!(utils::signed_data(service.as_bytes(), &date_region_key));
         let signing_key = try!(utils::signed_data(aws4, &date_region_service_key));
         let signature = try!(utils::signed_data(string_to_sign.as_bytes(), &signing_key));
         debug!("Signature\n{}", signature.to_hex());
@@ -617,14 +619,19 @@ impl AWSAuth {
     }
 
     fn v2(&self) -> AWSAuthResult {
-        let string_to_sign = format!("{}\n{}\n{}\n{}",
-                                     self.req_type,
-                                     self.host,
-                                     try!(self.canonical_uri()),
-                                     try!(self.canonical_query_string()));
+        let string_to_sign = format!(
+            "{}\n{}\n{}\n{}",
+            self.req_type,
+            self.host,
+            try!(self.canonical_uri()),
+            try!(self.canonical_query_string())
+        );
         debug!("V2: StringToSign\n{}", string_to_sign);
         let key = &self.secret_access_key;
-        let signature = try!(utils::signed_data(string_to_sign.as_bytes(), key.as_bytes()));
+        let signature = try!(utils::signed_data(
+            string_to_sign.as_bytes(),
+            key.as_bytes()
+        ));
         let encoded_sig = try!(quote(signature.to_base64(STANDARD), b""));
         debug!("V2: Signature\n{}", encoded_sig);
 
@@ -637,19 +644,23 @@ impl AWSAuth {
         } else {
             &self.payload_hash[..]
         };
-        let canonical_request = format!("{}\n{}\n{}\n{}\n{}\n{}",
-                                        self.req_type,
-                                        try!(self.canonical_uri()),
-                                        try!(self.canonical_query_string()),
-                                        self.canonical_headers(),
-                                        self.signed_headers(),
-                                        hash);
+        let canonical_request = format!(
+            "{}\n{}\n{}\n{}\n{}\n{}",
+            self.req_type,
+            try!(self.canonical_uri()),
+            try!(self.canonical_query_string()),
+            self.canonical_headers(),
+            self.signed_headers(),
+            hash
+        );
         debug!("V4: CanonicalRequest\n{}", canonical_request);
-        let string_to_sign = format!("{}\n{}\n{}\n{}",
-                                     self.sam,
-                                     self.date.format(DATE_TIME_FMT),
-                                     self.scope(),
-                                     try!(utils::hashed_data(Some(canonical_request.as_bytes()))));
+        let string_to_sign = format!(
+            "{}\n{}\n{}\n{}",
+            self.sam,
+            self.date.format(DATE_TIME_FMT),
+            self.scope(),
+            try!(utils::hashed_data(Some(canonical_request.as_bytes())))
+        );
         debug!("V4: StringToSign\n{}", string_to_sign);
 
         self.sign_string(&string_to_sign)
@@ -706,11 +717,13 @@ impl AWSAuth {
             Mode::Normal => try!(self.signature()),
             Mode::Chunked => try!(self.seed_signature()),
         };
-        Ok(format!("{} Credential={},SignedHeaders={},Signature={}",
-                   self.sam,
-                   self.credential(),
-                   self.signed_headers(),
-                   signature))
+        Ok(format!(
+            "{} Credential={},SignedHeaders={},Signature={}",
+            self.sam,
+            self.credential(),
+            self.signed_headers(),
+            signature
+        ))
     }
 
     /// Create the AWS Authorization Query String.
@@ -737,16 +750,18 @@ impl AWSAuth {
         match (&self.version, &self.mode) {
             (&SigningVersion::Four, &Mode::Normal) => {
                 let fmtdate = self.date.format(DATE_TIME_FMT).to_string();
-                Ok(format!("X-Amz-Algorithm={}\
+                Ok(format!(
+                    "X-Amz-Algorithm={}\
                            &X-Amz-Credential={}\
                            &X-Amz-Date={}\
                            &X-Amz-SignedHeaders={}\
                            &X-Amz-Signature={}",
-                           self.sam,
-                           try!(quote(self.credential(), b"")),
-                           fmtdate,
-                           try!(quote(self.signed_headers(), b"")),
-                           try!(self.signature())))
+                    self.sam,
+                    try!(quote(self.credential(), b"")),
+                    fmtdate,
+                    try!(quote(self.signed_headers(), b"")),
+                    try!(self.signature())
+                ))
             }
             _ => Err(AWSAuthError::ModeError),
         }
@@ -812,13 +827,15 @@ impl AWSAuth {
                 } else {
                     try!(utils::hashed_data(Some(chunk)))
                 };
-                let string_to_sign = format!("{}\n{}\n{}\n{}\n{}\n{}",
-                                             self.sam,
-                                             self.date.format(DATE_TIME_FMT),
-                                             self.scope(),
-                                             previous_signature,
-                                             try!(utils::hashed_data(None)),
-                                             hashed_chunk);
+                let string_to_sign = format!(
+                    "{}\n{}\n{}\n{}\n{}\n{}",
+                    self.sam,
+                    self.date.format(DATE_TIME_FMT),
+                    self.scope(),
+                    previous_signature,
+                    try!(utils::hashed_data(None)),
+                    hashed_chunk
+                );
                 debug!("StringToSign\n{}", string_to_sign);
                 Ok(try!(self.sign_string(&string_to_sign)))
             }
@@ -960,7 +977,7 @@ impl fmt::Display for SAM {
     }
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 /// See [RFC7231](https://tools.ietf.org/html/rfc7231#section-4)
 pub enum HttpRequestMethod {
     /// [GET] (https://tools.ietf.org/html/rfc7231#section-4.3.1)

@@ -15,7 +15,7 @@ use std::error::Error;
 use std::fmt;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
-use warheadhateus::{AWSAuth, AWSAuthError, hashed_data, HttpRequestMethod, Region, Service};
+use warheadhateus::{hashed_data, AWSAuth, AWSAuthError, HttpRequestMethod, Region, Service};
 use xml::reader::{EventReader, XmlEvent};
 
 const EX_STDOUT: &'static str = "Unable to write to stdout!";
@@ -117,7 +117,8 @@ fn run() -> Result<(), AWSAuthError> {
                 .get(URL_1)
                 .header("Authorization", &ah)
                 .header("X-Amz-Date", fmtdate)
-                .exec().expect("Failed to perform EC2 GET!");
+                .exec()
+                .expect("Failed to perform EC2 GET!");
             let parser = EventReader::new(resp.get_body());
             let mut response: Response = Default::default();
             let mut curr_err: XmlError = Default::default();
@@ -127,11 +128,11 @@ fn run() -> Result<(), AWSAuthError> {
                 match e {
                     Ok(XmlEvent::StartElement { name, .. }) => {
                         flags = match &name.local_name[..] {
-                            "Code" => { flags | W_CODE },
-                            "Error" => { flags | W_ERR },
-                            "Message" => { flags | W_MESS },
-                            "RequestID" => { flags | W_RID },
-                            _ => flags
+                            "Code" => flags | W_CODE,
+                            "Error" => flags | W_ERR,
+                            "Message" => flags | W_MESS,
+                            "RequestID" => flags | W_RID,
+                            _ => flags,
                         }
                     }
                     Ok(XmlEvent::Characters(s)) => {
@@ -143,18 +144,18 @@ fn run() -> Result<(), AWSAuthError> {
                             response.request_id = s;
                         }
                     }
-                    Ok(XmlEvent::EndElement { name }) => {
-                        match &name.local_name[..] {
-                            "Code" => { flags = flags & !W_CODE; },
-                            "Error" => {
-                                flags = flags & !W_ERR;
-                                response.errors.push(curr_err);
-                                curr_err = Default::default();
-                             },
-                            "Message" => { flags = flags & !W_MESS },
-                            _ => {}
+                    Ok(XmlEvent::EndElement { name }) => match &name.local_name[..] {
+                        "Code" => {
+                            flags = flags & !W_CODE;
                         }
-                    }
+                        "Error" => {
+                            flags = flags & !W_ERR;
+                            response.errors.push(curr_err);
+                            curr_err = Default::default();
+                        }
+                        "Message" => flags = flags & !W_MESS,
+                        _ => {}
+                    },
                     Err(e) => {
                         println!("Error: {}", e);
                         break;

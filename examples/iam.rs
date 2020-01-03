@@ -4,7 +4,7 @@ extern crate warheadhateus;
 
 use chrono::UTC;
 use std::io::{self, Write};
-use warheadhateus::{AWSAuth, AWSAuthError, hashed_data, HttpRequestMethod, Region, Service};
+use warheadhateus::{hashed_data, AWSAuth, AWSAuthError, HttpRequestMethod, Region, Service};
 
 const EX_STDOUT: &'static str = "Unable to write to stdout!";
 const ACCESS_KEY_ID: &'static str = "AKIAJLXUEQWQQ2DGABQA";
@@ -29,7 +29,13 @@ fn run() -> Result<(), AWSAuthError> {
     auth.add_header("X-Amz-Date", &fmtdate);
 
     let ah = try!(auth.auth_header());
-    writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "X-Amz-Date: ", fmtdate).expect(EX_STDOUT);
+    writeln!(
+        io::stdout(),
+        "\x1b[32;1m{}\x1b[0m{}",
+        "X-Amz-Date: ",
+        fmtdate
+    )
+    .expect(EX_STDOUT);
     writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Authorization: ", ah).expect(EX_STDOUT);
 
     Ok(())
