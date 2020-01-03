@@ -22,11 +22,11 @@ fn credentials() -> Result<(String, String), io::Error> {
         for line in f.lines() {
             if let Ok(l) = line {
                 if let Some(caps) = akre.captures(&l) {
-                    ak.push_str(caps.at(1).expect("Unable to capture!"));
+                    ak.push_str(caps.get(1).expect("Unable to capture!").as_str());
                 }
 
                 if let Some(scaps) = skre.captures(&l) {
-                    sk.push_str(scaps.at(1).expect("Unable to capture!"));
+                    sk.push_str(scaps.get(1).expect("Unable to capture!").as_str());
                 }
             }
         }
