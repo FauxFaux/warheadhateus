@@ -26,9 +26,9 @@ const AWS_TEST_2: &'static str = "X-Amz-Algorithm=AWS4-HMAC-SHA256\
                                   d91039c6036bdb41";
 
 fn run() -> Result<(), AWSAuthError> {
-    let mut auth = r#try!(AWSAuth::new(URL_1));
-    let payload_hash = r#try!(hashed_data(None));
-    let scope_date = r#try!(Utc.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
+    let mut auth = AWSAuth::new(URL_1)?;
+    let payload_hash = hashed_data(None)?;
+    let scope_date = Utc.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)?;
     auth.set_request_type(HttpRequestMethod::GET)
         .set_payload_hash(&payload_hash)
         .set_date(scope_date)
@@ -41,11 +41,11 @@ fn run() -> Result<(), AWSAuthError> {
         .add_header("x-amz-date", SCOPE_DATE)
         .add_header("Range", "bytes=0-9");
 
-    let ah = r#try!(auth.auth_header());
+    let ah = auth.auth_header()?;
     writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Authorization: ", ah).expect(EX_STDOUT);
     assert!(ah == AWS_TEST_1);
 
-    let qs = r#try!(auth.query_string());
+    let qs = auth.query_string()?;
     writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Query String: ", qs).expect(EX_STDOUT);
     assert!(qs == AWS_TEST_2);
 

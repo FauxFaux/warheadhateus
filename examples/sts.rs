@@ -16,7 +16,7 @@ fn credentials() -> Result<(String, String), io::Error> {
     if let Some(hd) = env::home_dir() {
         let akre = Regex::new(r"^aws_access_key_id = (.*)").expect("Failed to compile regex!");
         let skre = Regex::new(r"^aws_secret_access_key = (.*)").expect("Failed to compile regex!");
-        let creds = r#try!(File::open(hd.join(".aws").join("credentials")));
+        let creds = File::open(hd.join(".aws").join("credentials"))?;
         let f = BufReader::new(creds);
 
         for line in f.lines() {
@@ -52,13 +52,13 @@ fn run(token: &str) -> Result<(), AWSAuthError> {
                           &Timestamp={}",
             token, access_key, fmtdate
         );
-        let mut auth = r#try!(AWSAuth::new(&url));
+        let mut auth = AWSAuth::new(&url)?;
         auth.set_version(SigningVersion::Two);
         auth.set_request_type(HttpRequestMethod::GET);
         auth.set_access_key_id(&access_key);
         auth.set_secret_access_key(&secret_key);
 
-        let sig = r#try!(auth.signature());
+        let sig = auth.signature()?;
         url.push_str(&format!("&Signature={}", sig));
         writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "URL: ", url).expect(EX_STDOUT);
         Ok(())

@@ -54,9 +54,9 @@ struct Response {
 
 impl fmt::Display for Response {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        r#try!(write!(f, "Response {}\n", self.request_id));
+        write!(f, "Response {}\n", self.request_id)?;
         for error in &self.errors {
-            r#try!(write!(f, "    {}", error));
+            write!(f, "    {}", error)?;
         }
         Ok(())
     }
@@ -69,7 +69,7 @@ fn credentials() -> Result<(String, String), io::Error> {
     if let Some(hd) = env::home_dir() {
         let akre = Regex::new(r"^aws_access_key_id = (.*)").expect("Failed to compile regex!");
         let skre = Regex::new(r"^aws_secret_access_key = (.*)").expect("Failed to compile regex!");
-        let creds = r#try!(File::open(hd.join(".aws").join("credentials")));
+        let creds = File::open(hd.join(".aws").join("credentials"))?;
         let f = BufReader::new(creds);
 
         for line in f.lines() {
@@ -91,8 +91,8 @@ fn credentials() -> Result<(String, String), io::Error> {
 fn run() -> Result<(), AWSAuthError> {
     match credentials() {
         Ok((ak, sk)) => {
-            let mut auth = r#try!(AWSAuth::new(URL_1));
-            let payload_hash = r#try!(hashed_data(None));
+            let mut auth = AWSAuth::new(URL_1)?;
+            let payload_hash = hashed_data(None)?;
             let date = Utc::now();
             let fmtdate = &date.format(DATE_TIME_FMT).to_string();
             auth.set_request_type(HttpRequestMethod::GET);
@@ -105,7 +105,7 @@ fn run() -> Result<(), AWSAuthError> {
             auth.add_header("Host", HOST);
             auth.add_header("X-Amz-Date", &fmtdate);
 
-            let ah = r#try!(auth.auth_header());
+            let ah = auth.auth_header()?;
 
             let resp = http::handle()
                 .get(URL_1)

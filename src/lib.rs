@@ -533,7 +533,7 @@ impl AWSAuth {
         if self.path.is_empty() {
             Ok("/".to_owned())
         } else {
-            Ok(r#try!(quote(&self.path, b"/")))
+            Ok(quote(&self.path, b"/")?)
         }
     }
 
@@ -545,11 +545,11 @@ impl AWSAuth {
             let mut params = HashMap::new();
             for qstr in &qstrs {
                 let kvs: Vec<&str> = qstr.split('=').collect();
-                let key = r#try!(quote(kvs[0], b""));
+                let key = quote(kvs[0], b"")?;
                 if kvs.len() == 1 {
                     params.insert(key, "".to_owned());
                 } else {
-                    let value = r#try!(quote(kvs[1], b""));
+                    let value = quote(kvs[1], b"")?;
                     params.insert(key, value);
                 }
             }
@@ -598,12 +598,11 @@ impl AWSAuth {
         let region = self.region.to_string();
         let service = self.service.to_string();
         let aws4 = AWS4_REQUEST.as_bytes();
-        let date_key = r#try!(utils::signed_data(date.as_bytes(), key.as_bytes()));
-        let date_region_key = r#try!(utils::signed_data(region.as_bytes(), &date_key));
-        let date_region_service_key =
-            r#try!(utils::signed_data(service.as_bytes(), &date_region_key));
-        let signing_key = r#try!(utils::signed_data(aws4, &date_region_service_key));
-        let signature = r#try!(utils::signed_data(string_to_sign.as_bytes(), &signing_key));
+        let date_key = utils::signed_data(date.as_bytes(), key.as_bytes())?;
+        let date_region_key = utils::signed_data(region.as_bytes(), &date_key)?;
+        let date_region_service_key = utils::signed_data(service.as_bytes(), &date_region_key)?;
+        let signing_key = utils::signed_data(aws4, &date_region_service_key)?;
+        let signature = utils::signed_data(string_to_sign.as_bytes(), &signing_key)?;
         debug!("Signature\n{}", hex::encode(&signature));
         Ok(hex::encode(signature))
     }
@@ -613,15 +612,12 @@ impl AWSAuth {
             "{}\n{}\n{}\n{}",
             self.req_type,
             self.host,
-            r#try!(self.canonical_uri()),
-            r#try!(self.canonical_query_string())
+            self.canonical_uri()?,
+            self.canonical_query_string()?
         );
         debug!("V2: StringToSign\n{}", string_to_sign);
         let key = &self.secret_access_key;
-        let signature = r#try!(utils::signed_data(
-            string_to_sign.as_bytes(),
-            key.as_bytes()
-        ));
+        let signature = utils::signed_data(string_to_sign.as_bytes(), key.as_bytes())?;
 
         let encoded_sig = quote(base64::encode(&signature), b"")?;
         debug!("V2: Signature\n{}", encoded_sig);
@@ -638,8 +634,8 @@ impl AWSAuth {
         let canonical_request = format!(
             "{}\n{}\n{}\n{}\n{}\n{}",
             self.req_type,
-            r#try!(self.canonical_uri()),
-            r#try!(self.canonical_query_string()),
+            self.canonical_uri()?,
+            self.canonical_query_string()?,
             self.canonical_headers(),
             self.signed_headers(),
             hash
@@ -650,7 +646,7 @@ impl AWSAuth {
             self.sam,
             self.date.format(DATE_TIME_FMT),
             self.scope(),
-            r#try!(utils::hashed_data(Some(canonical_request.as_bytes())))
+            utils::hashed_data(Some(canonical_request.as_bytes()))?
         );
         debug!("V4: StringToSign\n{}", string_to_sign);
 
@@ -705,8 +701,8 @@ impl AWSAuth {
     pub fn auth_header(&self) -> AWSAuthResult {
         init();
         let signature = match self.mode {
-            Mode::Normal => r#try!(self.signature()),
-            Mode::Chunked => r#try!(self.seed_signature()),
+            Mode::Normal => self.signature()?,
+            Mode::Chunked => self.seed_signature()?,
         };
         Ok(format!(
             "{} Credential={},SignedHeaders={},Signature={}",
@@ -748,10 +744,10 @@ impl AWSAuth {
                            &X-Amz-SignedHeaders={}\
                            &X-Amz-Signature={}",
                     self.sam,
-                    r#try!(quote(self.credential(), b"")),
+                    quote(self.credential(), b"")?,
                     fmtdate,
-                    r#try!(quote(self.signed_headers(), b"")),
-                    r#try!(self.signature())
+                    quote(self.signed_headers(), b"")?,
+                    self.signature()?
                 ))
             }
             _ => Err(AWSAuthError::ModeError),
@@ -782,7 +778,7 @@ impl AWSAuth {
     /// ```
     pub fn seed_signature(&self) -> AWSAuthResult {
         match (self.seed, &self.mode) {
-            (true, &Mode::Chunked) => Ok(r#try!(self.signature())),
+            (true, &Mode::Chunked) => Ok(self.signature()?),
             _ => Err(AWSAuthError::ModeError),
         }
     }
@@ -814,9 +810,9 @@ impl AWSAuth {
         match self.mode {
             Mode::Chunked => {
                 let hashed_chunk = if chunk.len() == 0 {
-                    r#try!(utils::hashed_data(None))
+                    utils::hashed_data(None)?
                 } else {
-                    r#try!(utils::hashed_data(Some(chunk)))
+                    utils::hashed_data(Some(chunk))?
                 };
                 let string_to_sign = format!(
                     "{}\n{}\n{}\n{}\n{}\n{}",
@@ -824,11 +820,11 @@ impl AWSAuth {
                     self.date.format(DATE_TIME_FMT),
                     self.scope(),
                     previous_signature,
-                    r#try!(utils::hashed_data(None)),
+                    utils::hashed_data(None)?,
                     hashed_chunk
                 );
                 debug!("StringToSign\n{}", string_to_sign);
-                Ok(r#try!(self.sign_string(&string_to_sign)))
+                Ok(self.sign_string(&string_to_sign)?)
             }
             _ => Err(AWSAuthError::ModeError),
         }

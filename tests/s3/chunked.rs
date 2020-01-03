@@ -26,14 +26,12 @@ fn test_cl(
     payload_size: usize,
 ) -> Result<usize, AWSAuthError> {
     auth.set_chunk_size(chunk_size);
-    Ok(r#try!(auth.content_length(payload_size)))
+    Ok(auth.content_length(payload_size)?)
 }
 
 fn get_auth() -> Result<AWSAuth, AWSAuthError> {
-    let mut auth = r#try!(AWSAuth::new(
-        "https://s3.amazonaws.com/examplebucket/chunkObject.txt"
-    ));
-    let scope_date = r#try!(Utc.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
+    let mut auth = AWSAuth::new("https://s3.amazonaws.com/examplebucket/chunkObject.txt")?;
+    let scope_date = Utc.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)?;
     auth.set_mode(Mode::Chunked);
     auth.set_request_type(HttpRequestMethod::PUT);
     auth.set_date(scope_date);
