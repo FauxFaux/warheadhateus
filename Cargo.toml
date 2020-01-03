@@ -13,11 +13,12 @@ version = "0.2.2-pre"
 edition = "2018"
 
 [dependencies]
+base64 = "0.11"
 chrono = "0.4"
+hex = "0.4"
 hmac = "0.7"
 log = "0.4"
 sha2 = "0.8"
-rustc-serialize = "~0.3.18"
 urlparse = "~0.7.3"
 
 [dependencies.clippy]

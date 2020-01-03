@@ -1,6 +1,5 @@
 use crate::error::AWSAuthError;
 use hmac::Mac as _;
-use rustc_serialize::hex::ToHex;
 use sha2::digest::Digest as _;
 
 /// Hash the given data (or an empty string) with SHA256.
@@ -10,7 +9,7 @@ pub fn hashed_data(data: Option<&[u8]>) -> Result<String, AWSAuthError> {
         Some(d) => d,
         None => "".as_bytes(),
     };
-    Ok(sha2::Sha256::digest(data_to_hash).to_hex())
+    Ok(hex::encode(sha2::Sha256::digest(data_to_hash)))
 }
 
 /// Sign the given data with the given key (HMAC-SHA256).

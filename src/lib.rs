@@ -62,7 +62,7 @@
 //!     auth.add_header("Range", "bytes=0-9");
 //!
 //!     let ah = auth.auth_header()?;
-//!     assert!(ah == AWS_TEST_1);
+//!     assert_eq!(ah, AWS_TEST_1);
 //!     writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Authorization: ", ah).expect(EX_STDOUT);
 //!
 //!     Ok(())
@@ -101,13 +101,8 @@
 #![cfg_attr(feature = "clippy", plugin(clippy))]
 #![cfg_attr(feature = "clippy", deny(clippy, clippy_pedantic))]
 #![deny(missing_docs)]
-extern crate chrono;
 #[macro_use]
 extern crate log;
-extern crate hmac;
-extern crate rustc_serialize;
-extern crate sha2;
-extern crate urlparse;
 
 mod error;
 mod types;
@@ -119,8 +114,6 @@ pub use crate::types::{Mode, Region, Service, SigningVersion};
 pub use crate::utils::{hashed_data, signed_data};
 
 use chrono::{DateTime, Utc};
-use rustc_serialize::base64::{ToBase64, STANDARD};
-use rustc_serialize::hex::ToHex;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::Once;
@@ -614,8 +607,8 @@ impl AWSAuth {
             r#try!(utils::signed_data(service.as_bytes(), &date_region_key));
         let signing_key = r#try!(utils::signed_data(aws4, &date_region_service_key));
         let signature = r#try!(utils::signed_data(string_to_sign.as_bytes(), &signing_key));
-        debug!("Signature\n{}", signature.to_hex());
-        Ok(signature.to_hex())
+        debug!("Signature\n{}", hex::encode(&signature));
+        Ok(hex::encode(signature))
     }
 
     fn v2(&self) -> AWSAuthResult {
@@ -632,7 +625,8 @@ impl AWSAuth {
             string_to_sign.as_bytes(),
             key.as_bytes()
         ));
-        let encoded_sig = r#try!(quote(signature.to_base64(STANDARD), b""));
+
+        let encoded_sig = quote(base64::encode(&signature), b"")?;
         debug!("V2: Signature\n{}", encoded_sig);
 
         Ok(encoded_sig)
