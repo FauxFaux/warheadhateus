@@ -12,9 +12,10 @@ version = "0.2.2-pre"
 
 [dependencies]
 chrono = "~0.2.19"
+hmac = "0.7"
 log = "~0.3.5"
+sha2 = "0.8"
 rustc-serialize = "~0.3.18"
-sodium-sys = "~0.0.4"
 urlparse = "~0.7.3"
 
 [dependencies.clippy]

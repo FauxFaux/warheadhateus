@@ -104,8 +104,9 @@
 extern crate chrono;
 #[macro_use]
 extern crate log;
+extern crate hmac;
 extern crate rustc_serialize;
-extern crate sodium_sys;
+extern crate sha2;
 extern crate urlparse;
 
 mod error;
@@ -120,7 +121,6 @@ pub use utils::{hashed_data, signed_data};
 use chrono::{DateTime, UTC};
 use rustc_serialize::base64::{STANDARD, ToBase64};
 use rustc_serialize::hex::ToHex;
-use sodium_sys::crypto::utils::init;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::{ONCE_INIT, Once};
@@ -132,12 +132,7 @@ const DATE_TIME_FMT: &'static str = "%Y%m%dT%H%M%SZ";
 
 static START: Once = ONCE_INIT;
 
-fn init() {
-    START.call_once(|| {
-        debug!("sodium_sys initialized");
-        init::init();
-    });
-}
+fn init() {}
 
 /// Amazon Web Service Authorization Header struct
 pub struct AWSAuth {

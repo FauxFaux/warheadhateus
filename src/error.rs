@@ -1,5 +1,4 @@
 use chrono;
-use sodium_sys;
 use std::error::Error;
 use std::fmt;
 use std::string::FromUtf8Error;
@@ -11,8 +10,6 @@ pub enum AWSAuthError {
     FromUtf8Error(FromUtf8Error),
     /// Error thrown when running methods not valid for the current mode.
     ModeError,
-    /// Error thrown during sodium operations.
-    Nacl(sodium_sys::SSError),
     /// General error thrown during operation.
     Other(&'static str),
     /// Error thrown parsing a datetime.
@@ -24,7 +21,6 @@ impl Error for AWSAuthError {
         match *self {
             AWSAuthError::FromUtf8Error(ref e) => e.description(),
             AWSAuthError::ModeError => "ModeError",
-            AWSAuthError::Nacl(_) => "Sodium SSError",
             AWSAuthError::Other(e) => e,
             AWSAuthError::ParseError(ref e) => e.description(),
         }
@@ -36,17 +32,10 @@ impl fmt::Display for AWSAuthError {
         let display = match *self {
             AWSAuthError::FromUtf8Error(_) => "FromUtf8Error",
             AWSAuthError::ModeError => "ModeError",
-            AWSAuthError::Nacl(_) => "SSError",
             AWSAuthError::Other(e) => e,
             AWSAuthError::ParseError(_) => "ParseError",
         };
         write!(f, "{}", display)
-    }
-}
-
-impl From<sodium_sys::SSError> for AWSAuthError {
-    fn from(e: sodium_sys::SSError) -> AWSAuthError {
-        AWSAuthError::Nacl(e)
     }
 }
 
