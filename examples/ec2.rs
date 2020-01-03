@@ -3,7 +3,6 @@ extern crate bitflags;
 
 use chrono::Utc;
 use regex::Regex;
-use std::env;
 use std::error::Error;
 use std::fmt;
 use std::fs::File;
@@ -24,12 +23,6 @@ bitflags! {
         const W_CODE       = 0b00000010;
         const W_MESS       = 0b00000100;
         const W_RID        = 0b00001000;
-    }
-}
-
-impl EventFlags {
-    pub fn clear(&mut self) {
-        self.bits = 0;
     }
 }
 
@@ -65,7 +58,7 @@ fn credentials() -> Result<(String, String), io::Error> {
     let mut ak = String::new();
     let mut sk = String::new();
 
-    if let Some(hd) = env::home_dir() {
+    if let Some(hd) = dirs::home_dir() {
         let akre = Regex::new(r"^aws_access_key_id = (.*)").expect("Failed to compile regex!");
         let skre = Regex::new(r"^aws_secret_access_key = (.*)").expect("Failed to compile regex!");
         let creds = File::open(hd.join(".aws").join("credentials"))?;

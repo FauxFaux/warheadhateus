@@ -1,7 +1,6 @@
 use chrono::Utc;
 use clap::{App, Arg};
 use regex::Regex;
-use std::env;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
 use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, SigningVersion};
@@ -13,7 +12,7 @@ fn credentials() -> Result<(String, String), io::Error> {
     let mut ak = String::new();
     let mut sk = String::new();
 
-    if let Some(hd) = env::home_dir() {
+    if let Some(hd) = dirs::home_dir() {
         let akre = Regex::new(r"^aws_access_key_id = (.*)").expect("Failed to compile regex!");
         let skre = Regex::new(r"^aws_secret_access_key = (.*)").expect("Failed to compile regex!");
         let creds = File::open(hd.join(".aws").join("credentials"))?;

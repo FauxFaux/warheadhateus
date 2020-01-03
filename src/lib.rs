@@ -113,16 +113,11 @@ pub use crate::utils::{hashed_data, signed_data};
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::fmt;
-use std::sync::Once;
 use urlparse::{quote, urlparse};
 
 const AWS4_REQUEST: &'static str = "aws4_request";
 const DATE_FMT: &'static str = "%Y%m%d";
 const DATE_TIME_FMT: &'static str = "%Y%m%dT%H%M%SZ";
-
-static START: Once = Once::new();
-
-fn init() {}
 
 /// Amazon Web Service Authorization Header struct
 pub struct AWSAuth {
@@ -699,7 +694,6 @@ impl AWSAuth {
     /// }
     /// ```
     pub fn auth_header(&self) -> AWSAuthResult {
-        init();
         let signature = match self.mode {
             Mode::Normal => self.signature()?,
             Mode::Chunked => self.seed_signature()?,
@@ -733,7 +727,6 @@ impl AWSAuth {
     /// }
     /// ```
     pub fn query_string(&self) -> AWSAuthResult {
-        init();
         match (&self.version, &self.mode) {
             (&SigningVersion::Four, &Mode::Normal) => {
                 let fmtdate = self.date.format(DATE_TIME_FMT).to_string();
