@@ -19,12 +19,12 @@ const URL_1: &'static str = "https://ec2.amazonaws.com/?Version=2015-10-01\
                             &Action=DescribeInstances&DryRun=true";
 
 bitflags! {
-    flags EventFlags: u32 {
-        const W_NONE       = 0b00000000,
-        const W_ERR        = 0b00000001,
-        const W_CODE       = 0b00000010,
-        const W_MESS       = 0b00000100,
-        const W_RID        = 0b00001000,
+    struct EventFlags: u32 {
+        const W_NONE       = 0b00000000;
+        const W_ERR        = 0b00000001;
+        const W_CODE       = 0b00000010;
+        const W_MESS       = 0b00000100;
+        const W_RID        = 0b00001000;
     }
 }
 
@@ -116,38 +116,38 @@ fn run() -> Result<(), AWSAuthError> {
             let parser = EventReader::new(resp.get_body());
             let mut response: Response = Default::default();
             let mut curr_err: XmlError = Default::default();
-            let mut flags = W_NONE;
+            let mut flags = EventFlags::W_NONE;
 
             for e in parser {
                 match e {
                     Ok(XmlEvent::StartElement { name, .. }) => {
                         flags = match &name.local_name[..] {
-                            "Code" => flags | W_CODE,
-                            "Error" => flags | W_ERR,
-                            "Message" => flags | W_MESS,
-                            "RequestID" => flags | W_RID,
+                            "Code" => flags | EventFlags::W_CODE,
+                            "Error" => flags | EventFlags::W_ERR,
+                            "Message" => flags | EventFlags::W_MESS,
+                            "RequestID" => flags | EventFlags::W_RID,
                             _ => flags,
                         }
                     }
                     Ok(XmlEvent::Characters(s)) => {
-                        if flags == W_ERR | W_CODE {
+                        if flags == EventFlags::W_ERR | EventFlags::W_CODE {
                             curr_err.code = s;
-                        } else if flags == W_ERR | W_MESS {
+                        } else if flags == EventFlags::W_ERR | EventFlags::W_MESS {
                             curr_err.message = s;
-                        } else if flags == W_RID {
+                        } else if flags == EventFlags::W_RID {
                             response.request_id = s;
                         }
                     }
                     Ok(XmlEvent::EndElement { name }) => match &name.local_name[..] {
                         "Code" => {
-                            flags = flags & !W_CODE;
+                            flags = flags & !EventFlags::W_CODE;
                         }
                         "Error" => {
-                            flags = flags & !W_ERR;
+                            flags = flags & !EventFlags::W_ERR;
                             response.errors.push(curr_err);
                             curr_err = Default::default();
                         }
-                        "Message" => flags = flags & !W_MESS,
+                        "Message" => flags = flags & !EventFlags::W_MESS,
                         _ => {}
                     },
                     Err(e) => {
