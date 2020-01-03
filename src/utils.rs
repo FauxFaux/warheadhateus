@@ -6,7 +6,7 @@ use sha2::digest::Digest as _;
 pub fn hashed_data(data: Option<&[u8]>) -> Result<String, AWSAuthError> {
     let data_to_hash = match data {
         Some(d) => d,
-        None => "".as_bytes(),
+        None => b"",
     };
     Ok(hex::encode(sha2::Sha256::digest(data_to_hash)))
 }

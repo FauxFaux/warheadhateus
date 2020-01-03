@@ -115,9 +115,9 @@ use std::collections::HashMap;
 use std::fmt;
 use urlparse::{quote, urlparse};
 
-const AWS4_REQUEST: &'static str = "aws4_request";
-const DATE_FMT: &'static str = "%Y%m%d";
-const DATE_TIME_FMT: &'static str = "%Y%m%dT%H%M%SZ";
+const AWS4_REQUEST: &str = "aws4_request";
+const DATE_FMT: &str = "%Y%m%d";
+const DATE_TIME_FMT: &str = "%Y%m%dT%H%M%SZ";
 
 /// Amazon Web Service Authorization Header struct
 pub struct AWSAuth {
@@ -278,10 +278,6 @@ impl AWSAuth {
     /// # Examples
     ///
     /// ```
-    /// # extern crate chrono;
-    /// # extern crate warheadhateus;
-    /// #
-    /// # fn main() {
     /// use chrono::Utc;
     /// use warheadhateus::AWSAuth;
     ///
@@ -293,7 +289,6 @@ impl AWSAuth {
     ///         // Failure
     ///     }
     /// }
-    /// # }
     /// ```
     pub fn set_date(&mut self, date: DateTime<Utc>) -> &mut AWSAuth {
         self.date = date;
@@ -802,7 +797,7 @@ impl AWSAuth {
     pub fn chunk_signature(&self, previous_signature: &str, chunk: &[u8]) -> AWSAuthResult {
         match self.mode {
             Mode::Chunked => {
-                let hashed_chunk = if chunk.len() == 0 {
+                let hashed_chunk = if chunk.is_empty() {
                     utils::hashed_data(None)?
                 } else {
                     utils::hashed_data(Some(chunk))?
