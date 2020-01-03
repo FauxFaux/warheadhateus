@@ -2,7 +2,6 @@
 extern crate bitflags;
 
 use chrono::Utc;
-use curl::http;
 use regex::Regex;
 use std::env;
 use std::error::Error;
@@ -107,13 +106,14 @@ fn run() -> Result<(), AWSAuthError> {
 
             let ah = auth.auth_header()?;
 
-            let resp = http::handle()
+            let resp = reqwest::blocking::Client::new()
                 .get(URL_1)
                 .header("Authorization", &ah)
                 .header("X-Amz-Date", fmtdate)
-                .exec()
+                .send()
                 .expect("Failed to perform EC2 GET!");
-            let parser = EventReader::new(resp.get_body());
+            let text = resp.text().expect("invalid EC2 GET response");
+            let parser = EventReader::from_str(&text);
             let mut response: Response = Default::default();
             let mut curr_err: XmlError = Default::default();
             let mut flags = EventFlags::W_NONE;
