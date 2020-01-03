@@ -1,7 +1,3 @@
-extern crate chrono;
-extern crate env_logger;
-extern crate warheadhateus;
-
 use chrono::offset::TimeZone;
 use chrono::UTC;
 use std::fmt;
@@ -68,10 +64,10 @@ impl OutCache {
 
 fn run() -> Result<(), AWSAuthError> {
     let chunk_size = 65536;
-    let mut auth = try!(AWSAuth::new(
+    let mut auth = r#try!(AWSAuth::new(
         "https://s3.amazonaws.com/examplebucket/chunkObject.txt"
     ));
-    let scope_date = try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
+    let scope_date = r#try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
     auth.set_mode(Mode::Chunked);
     auth.set_request_type(HttpRequestMethod::PUT);
     auth.set_date(scope_date);
@@ -90,12 +86,12 @@ fn run() -> Result<(), AWSAuthError> {
     auth.add_header("Content-Length", "66824");
 
     let payload = vec![97; 66560];
-    let ah = try!(auth.auth_header());
+    let ah = r#try!(auth.auth_header());
     let mut oc: OutCache = Default::default();
     oc.hl("Authorization", ah);
-    let cl = try!(auth.content_length(payload.len()));
+    let cl = r#try!(auth.content_length(payload.len()));
     oc.hl("Content-Length", cl);
-    let ss = try!(auth.seed_signature());
+    let ss = r#try!(auth.seed_signature());
     oc.hl("Seed Signature", &ss);
     auth.set_sam(SAM::AWS4HMACSHA256PAYLOAD);
     auth.set_seed(false);
@@ -107,9 +103,9 @@ fn run() -> Result<(), AWSAuthError> {
     let mut count = 1;
 
     for (i, chunk) in payload.chunks(chunk_size).enumerate() {
-        let cs = try!(auth.chunk_signature(&ps, &chunk));
+        let cs = r#try!(auth.chunk_signature(&ps, &chunk));
         oc.hl(&format!("Chunk {} Signature", i + 1), &cs);
-        let cb = try!(auth.chunk_body(&cs, &chunk));
+        let cb = r#try!(auth.chunk_body(&cs, &chunk));
         tl += cb.len();
         oc.hl(&format!("Chunk {} Body Length", i + 1), &cb.len());
         if let Some(p) = cb.len().checked_sub(chunk.len()) {
@@ -125,9 +121,9 @@ fn run() -> Result<(), AWSAuthError> {
     }
 
     // Final 0-byte payload chunk
-    let cs = try!(auth.chunk_signature(&ps, &[]));
+    let cs = r#try!(auth.chunk_signature(&ps, &[]));
     oc.hl(&format!("Chunk {} Signature", count), &cs);
-    let cb = try!(auth.chunk_body(&cs, &[]));
+    let cb = r#try!(auth.chunk_body(&cs, &[]));
     tl += cb.len();
     oc.hl(&format!("Chunk {} Body Length", count), &cb.len());
     if let Some(p) = cb.len().checked_sub(0) {

@@ -1,7 +1,3 @@
-extern crate chrono;
-extern crate env_logger;
-extern crate warheadhateus;
-
 use chrono::UTC;
 use std::io::{self, Write};
 use warheadhateus::{hashed_data, AWSAuth, AWSAuthError, HttpRequestMethod, Region, Service};
@@ -14,8 +10,8 @@ const SECRET_ACCESS_KEY: &'static str = "94lsPupTRZa9nTbDnoTYg4BO6+BF19jVZYbrepr
 const URL_1: &'static str = "https://iam.amazonaws.com/?Version=2010-05-08&Action=ListUsers";
 
 fn run() -> Result<(), AWSAuthError> {
-    let mut auth = try!(AWSAuth::new(URL_1));
-    let payload_hash = try!(hashed_data(None));
+    let mut auth = r#try!(AWSAuth::new(URL_1));
+    let payload_hash = r#try!(hashed_data(None));
     let date = UTC::now();
     let fmtdate = &date.format(DATE_TIME_FMT).to_string();
     auth.set_request_type(HttpRequestMethod::GET);
@@ -28,7 +24,7 @@ fn run() -> Result<(), AWSAuthError> {
     auth.add_header("Host", HOST);
     auth.add_header("X-Amz-Date", &fmtdate);
 
-    let ah = try!(auth.auth_header());
+    let ah = r#try!(auth.auth_header());
     writeln!(
         io::stdout(),
         "\x1b[32;1m{}\x1b[0m{}",

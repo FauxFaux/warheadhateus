@@ -1,4 +1,4 @@
-use error::{ParseRegionError, ParseServiceError};
+use crate::error::{ParseRegionError, ParseServiceError};
 use std::fmt;
 use std::str::FromStr;
 

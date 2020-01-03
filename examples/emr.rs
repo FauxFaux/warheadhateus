@@ -1,6 +1,3 @@
-extern crate env_logger;
-extern crate warheadhateus;
-
 use std::io::{self, Write};
 use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, SigningVersion};
 
@@ -18,13 +15,13 @@ fn run() -> Result<(), AWSAuthError> {
                       &SignatureMethod=HmacSHA256\
                       &Timestamp=2011-10-03T15:19:30"
     );
-    let mut auth = try!(AWSAuth::new(&url));
+    let mut auth = r#try!(AWSAuth::new(&url));
     auth.set_version(SigningVersion::Two);
     auth.set_request_type(HttpRequestMethod::GET);
     auth.set_access_key_id(ACCESS_KEY_ID);
     auth.set_secret_access_key(SECRET_ACCESS_KEY);
 
-    let sig = try!(auth.signature());
+    let sig = r#try!(auth.signature());
     writeln!(io::stdout(), "\x1b[32;1m{}\x1b[0m{}", "Signature: ", sig).expect(EX_STDOUT);
 
     Ok(())

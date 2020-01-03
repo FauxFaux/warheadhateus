@@ -1,7 +1,7 @@
+use crate::{fail, ACCESS_KEY_ID, DATE_TIME_FMT, HOST, SCOPE_DATE, SECRET_ACCESS_KEY};
 use chrono::offset::TimeZone;
 use chrono::UTC;
 use warheadhateus::{hashed_data, AWSAuth, HttpRequestMethod, Region, Service};
-use {fail, ACCESS_KEY_ID, DATE_TIME_FMT, HOST, SCOPE_DATE, SECRET_ACCESS_KEY};
 
 const URL_1: &'static str = "https://examplebucket.s3.amazonaws.com/test.txt";
 const URL_2: &'static str = "https://examplebucket.s3.amazonaws.com/test$file.text";

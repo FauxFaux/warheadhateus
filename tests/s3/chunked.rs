@@ -1,7 +1,7 @@
+use crate::{fail, ACCESS_KEY_ID, DATE_TIME_FMT, SCOPE_DATE, SECRET_ACCESS_KEY};
 use chrono::offset::TimeZone;
 use chrono::UTC;
 use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, Mode, Region, Service, SAM};
-use {fail, ACCESS_KEY_ID, DATE_TIME_FMT, SCOPE_DATE, SECRET_ACCESS_KEY};
 
 const HOST: &'static str = "s3.amazonaws.com";
 const SEED_SIG: &'static str = "4f232c4386841ef735655705268965c44a0e4690baa4adea153f7db9fa80a0\
@@ -26,14 +26,14 @@ fn test_cl(
     payload_size: usize,
 ) -> Result<usize, AWSAuthError> {
     auth.set_chunk_size(chunk_size);
-    Ok(try!(auth.content_length(payload_size)))
+    Ok(r#try!(auth.content_length(payload_size)))
 }
 
 fn get_auth() -> Result<AWSAuth, AWSAuthError> {
-    let mut auth = try!(AWSAuth::new(
+    let mut auth = r#try!(AWSAuth::new(
         "https://s3.amazonaws.com/examplebucket/chunkObject.txt"
     ));
-    let scope_date = try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
+    let scope_date = r#try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
     auth.set_mode(Mode::Chunked);
     auth.set_request_type(HttpRequestMethod::PUT);
     auth.set_date(scope_date);

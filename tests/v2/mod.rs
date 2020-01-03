@@ -1,5 +1,5 @@
+use crate::{fail, ACCESS_KEY_ID, SECRET_ACCESS_KEY};
 use warheadhateus::{AWSAuth, HttpRequestMethod, SigningVersion};
-use {fail, ACCESS_KEY_ID, SECRET_ACCESS_KEY};
 
 const SIG_1: &'static str = "i91nKc4PWAt0JJIdXwz9HxZCJDdiy6cf%2FMj6vPxyYIs%3D";
 

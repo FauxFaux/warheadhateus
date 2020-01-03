@@ -1,4 +1,4 @@
-use error::AWSAuthError;
+use crate::error::AWSAuthError;
 use hmac::Mac as _;
 use rustc_serialize::hex::ToHex;
 use sha2::digest::Digest as _;
