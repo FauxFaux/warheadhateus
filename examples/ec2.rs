@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate bitflags;
 
-use chrono::UTC;
+use chrono::Utc;
 use curl::http;
 use regex::Regex;
 use std::env;
@@ -93,11 +93,11 @@ fn run() -> Result<(), AWSAuthError> {
         Ok((ak, sk)) => {
             let mut auth = r#try!(AWSAuth::new(URL_1));
             let payload_hash = r#try!(hashed_data(None));
-            let date = UTC::now();
+            let date = Utc::now();
             let fmtdate = &date.format(DATE_TIME_FMT).to_string();
             auth.set_request_type(HttpRequestMethod::GET);
             auth.set_payload_hash(&payload_hash);
-            auth.set_date(UTC::now());
+            auth.set_date(Utc::now());
             auth.set_service(Service::EC2);
             auth.set_access_key_id(&ak);
             auth.set_secret_access_key(&sk);

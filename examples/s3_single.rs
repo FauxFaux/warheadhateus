@@ -1,5 +1,5 @@
 use chrono::offset::TimeZone;
-use chrono::UTC;
+use chrono::Utc;
 use std::io::{self, Write};
 use warheadhateus::{hashed_data, AWSAuth, AWSAuthError, HttpRequestMethod, Region, Service};
 
@@ -28,7 +28,7 @@ const AWS_TEST_2: &'static str = "X-Amz-Algorithm=AWS4-HMAC-SHA256\
 fn run() -> Result<(), AWSAuthError> {
     let mut auth = r#try!(AWSAuth::new(URL_1));
     let payload_hash = r#try!(hashed_data(None));
-    let scope_date = r#try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
+    let scope_date = r#try!(Utc.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
     auth.set_request_type(HttpRequestMethod::GET)
         .set_payload_hash(&payload_hash)
         .set_date(scope_date)

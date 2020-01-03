@@ -28,7 +28,7 @@
 //! # extern crate warheadhateus;
 //!
 //! # fn main() {
-//! use chrono::UTC;
+//! use chrono::Utc;
 //! use chrono::offset::TimeZone;
 //! use std::io::{self, Write};
 //! use warheadhateus::{AWSAuth, AWSAuthError, hashed_data, HttpRequestMethod, Region, Service};
@@ -48,7 +48,7 @@
 //! fn run() -> Result<(), AWSAuthError> {
 //!     let mut auth = AWSAuth::new(URL_1)?;
 //!     let payload_hash = hashed_data(None)?;
-//!     let scope_date = UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)?;
+//!     let scope_date = Utc.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)?;
 //!     auth.set_request_type(HttpRequestMethod::GET);
 //!     auth.set_payload_hash(&payload_hash);
 //!     auth.set_date(scope_date);
@@ -118,7 +118,7 @@ pub use crate::error::{AWSAuthError, ParseRegionError, ParseServiceError};
 pub use crate::types::{Mode, Region, Service, SigningVersion};
 pub use crate::utils::{hashed_data, signed_data};
 
-use chrono::{DateTime, UTC};
+use chrono::{DateTime, Utc};
 use rustc_serialize::base64::{ToBase64, STANDARD};
 use rustc_serialize::hex::ToHex;
 use std::collections::HashMap;
@@ -138,7 +138,7 @@ fn init() {}
 pub struct AWSAuth {
     access_key_id: String,
     chunk_size: usize,
-    date: DateTime<UTC>,
+    date: DateTime<Utc>,
     headers: HashMap<String, String>,
     host: String,
     mode: Mode,
@@ -159,7 +159,7 @@ impl Default for AWSAuth {
         AWSAuth {
             access_key_id: String::new(),
             chunk_size: 0,
-            date: UTC::now(),
+            date: Utc::now(),
             headers: HashMap::new(),
             host: String::new(),
             mode: Mode::Normal,
@@ -297,12 +297,12 @@ impl AWSAuth {
     /// # extern crate warheadhateus;
     /// #
     /// # fn main() {
-    /// use chrono::UTC;
+    /// use chrono::Utc;
     /// use warheadhateus::AWSAuth;
     ///
     /// match AWSAuth::new("https://s3.amazonaws.com/examplebucket/test.txt") {
     ///     Ok(mut auth) => {
-    ///         auth.set_date(UTC::now());
+    ///         auth.set_date(Utc::now());
     ///     }
     ///     Err(_) => {
     ///         // Failure
@@ -310,7 +310,7 @@ impl AWSAuth {
     /// }
     /// # }
     /// ```
-    pub fn set_date(&mut self, date: DateTime<UTC>) -> &mut AWSAuth {
+    pub fn set_date(&mut self, date: DateTime<Utc>) -> &mut AWSAuth {
         self.date = date;
         self
     }

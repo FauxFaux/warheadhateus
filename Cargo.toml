@@ -13,7 +13,7 @@ version = "0.2.2-pre"
 edition = "2018"
 
 [dependencies]
-chrono = "~0.2.19"
+chrono = "0.4"
 hmac = "0.7"
 log = "~0.3.5"
 sha2 = "0.8"

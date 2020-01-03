@@ -1,5 +1,5 @@
 use chrono::offset::TimeZone;
-use chrono::UTC;
+use chrono::Utc;
 use std::fmt;
 use std::io::{self, Write};
 use warheadhateus::{AWSAuth, AWSAuthError, HttpRequestMethod, Mode, Region, Service, SAM};
@@ -67,7 +67,7 @@ fn run() -> Result<(), AWSAuthError> {
     let mut auth = r#try!(AWSAuth::new(
         "https://s3.amazonaws.com/examplebucket/chunkObject.txt"
     ));
-    let scope_date = r#try!(UTC.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
+    let scope_date = r#try!(Utc.datetime_from_str(SCOPE_DATE, DATE_TIME_FMT));
     auth.set_mode(Mode::Chunked);
     auth.set_request_type(HttpRequestMethod::PUT);
     auth.set_date(scope_date);

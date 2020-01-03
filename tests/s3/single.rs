@@ -1,6 +1,6 @@
 use crate::{fail, ACCESS_KEY_ID, DATE_TIME_FMT, HOST, SCOPE_DATE, SECRET_ACCESS_KEY};
 use chrono::offset::TimeZone;
-use chrono::UTC;
+use chrono::Utc;
 use warheadhateus::{hashed_data, AWSAuth, HttpRequestMethod, Region, Service};
 
 const URL_1: &'static str = "https://examplebucket.s3.amazonaws.com/test.txt";
@@ -34,7 +34,7 @@ const AWS_TEST_4: &'static str = "AWS4-HMAC-SHA256 \
 fn test_get_object() {
     let mut auth = AWSAuth::new(URL_1).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC
+    let scope_date = Utc
         .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
         .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::GET);
@@ -57,7 +57,7 @@ fn test_get_object() {
 fn test_put_object() {
     let mut auth = AWSAuth::new(URL_2).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(Some(b"Welcome to Amazon S3.")).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC
+    let scope_date = Utc
         .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
         .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::PUT);
@@ -81,7 +81,7 @@ fn test_put_object() {
 fn test_get_bucket_lifecycle() {
     let mut auth = AWSAuth::new(URL_3).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC
+    let scope_date = Utc
         .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
         .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::GET);
@@ -103,7 +103,7 @@ fn test_get_bucket_lifecycle() {
 fn test_get_bucket_list_objects() {
     let mut auth = AWSAuth::new(URL_4).unwrap_or_else(|e| fail(e));
     let payload_hash = hashed_data(None).unwrap_or_else(|e| fail(e));
-    let scope_date = UTC
+    let scope_date = Utc
         .datetime_from_str(SCOPE_DATE, DATE_TIME_FMT)
         .unwrap_or_else(|e| fail(e));
     auth.set_request_type(HttpRequestMethod::GET);

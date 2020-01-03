@@ -1,4 +1,4 @@
-use chrono::UTC;
+use chrono::Utc;
 use std::io::{self, Write};
 use warheadhateus::{hashed_data, AWSAuth, AWSAuthError, HttpRequestMethod, Region, Service};
 
@@ -12,11 +12,11 @@ const URL_1: &'static str = "https://iam.amazonaws.com/?Version=2010-05-08&Actio
 fn run() -> Result<(), AWSAuthError> {
     let mut auth = r#try!(AWSAuth::new(URL_1));
     let payload_hash = r#try!(hashed_data(None));
-    let date = UTC::now();
+    let date = Utc::now();
     let fmtdate = &date.format(DATE_TIME_FMT).to_string();
     auth.set_request_type(HttpRequestMethod::GET);
     auth.set_payload_hash(&payload_hash);
-    auth.set_date(UTC::now());
+    auth.set_date(Utc::now());
     auth.set_service(Service::IAM);
     auth.set_access_key_id(ACCESS_KEY_ID);
     auth.set_secret_access_key(SECRET_ACCESS_KEY);

@@ -1,4 +1,4 @@
-use chrono::UTC;
+use chrono::Utc;
 use clap::{App, Arg};
 use regex::Regex;
 use std::env;
@@ -36,7 +36,7 @@ fn credentials() -> Result<(String, String), io::Error> {
 }
 
 fn run(token: &str) -> Result<(), AWSAuthError> {
-    let date = UTC::now();
+    let date = Utc::now();
     let fmtdate = date.format(DATE_TIME_FMT).to_string();
     if let Ok((access_key, secret_key)) = credentials() {
         let mut url = format!(
